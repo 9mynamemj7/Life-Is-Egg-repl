@@ -1,5 +1,6 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, getByPlaceholderText, render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 
 const MyEvent = () => {
   const [name, setName] = React.useState('');
@@ -10,36 +11,66 @@ const MyEvent = () => {
     setMessage(`${name}, Hi!`);
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        role="textbox"
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button role="button" type="submit">Submit</button>
-      <p>{message}</p>
-    </form>
-  );
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  }
 
+  return (
+    <div>
+      <div>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={name}
+            onChange={handleChange}
+            placeholder='응답하라'
+          />
+          <button type="submit" disabled={!name}>Submit</button>
+        </form>
+      </div>
+      <div>
+        <p>{message}</p>
+      </div>
+    </div>
+  );
+}
+
+const setup = () => {
+  const utils = render(<MyEvent />);
+  const input = screen.getByRole('textbox');
+  const button = screen.getByRole('button');
+  return {
+    input,
+    button,
+    ...utils,
+  }
 }
 
 
-describe('제출 이벤트 핸들러를 테스트합니다.', () => {
-  beforeEach(() => {
+describe('폼 렌더링 테스트.', () => {
+
+  test("input이 있어야한다.", () => {
     render(<MyEvent />);
+    const input = screen.getByRole('textbox');
+    expect(input).toBeInTheDocument();
   });
 
-  it('텍스트를 입력하여 제출 버튼을 누르면 그 텍스트 뒤에 "Hi!"를 추가합니다.', () => {
+  test('버튼이 있는지 확인', () => {
+    render(<MyEvent />);
     const button = screen.getByRole('button');
-    const name = screen.getByRole('textbox');
-    fireEvent.click(button);
+    expect(button).toBeInTheDocument();
+  })
 
-    if (name !== null) {
-      expect(`${name}, Hi!`).toBeInTheDocument();
-    } else {
-      throw new Error('에러..');
-    }
+  test('입력 값이 없으면 버튼은 비활성화 되어있어야한다.', () => {
+    const { input, button } = setup();
+    expect(button).toBeDisabled();
+  })
+
+  test('텍스트를 입력하여 제출 버튼을 누르면 그 텍스트 뒤에 ", Hi!"를 추가합니다.', () => {
+    const {input, button} = setup()
+    fireEvent.change(input, {target: {value: 'it is me'}})
+    fireEvent.click(button);
+    expect(button).toBeEnabled();
+    expect(screen.getByText('it is me, Hi!')).toBeInTheDocument();
+    })
   });
-});
