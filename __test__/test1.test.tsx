@@ -2,39 +2,8 @@ import React from 'react';
 import { fireEvent, getByPlaceholderText, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-const MyEvent = () => {
-  const [name, setName] = React.useState('');
-  const [message, setMessage] = React.useState('');
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setMessage(`${name}, Hi!`);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-  }
-
-  return (
-    <div>
-      <div>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={name}
-            onChange={handleChange}
-            placeholder='응답하라'
-          />
-          <button type="submit" disabled={!name}>Submit</button>
-        </form>
-      </div>
-      <div>
-        <p>{message}</p>
-      </div>
-    </div>
-  );
-}
-
+////
+////
 const setup = () => {
   const utils = render(<MyEvent />);
   const input = screen.getByRole('textbox');
